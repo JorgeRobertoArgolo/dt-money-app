@@ -4,6 +4,8 @@ import { PublicRoutes } from './PublicRoutes';
 import { useCallback, useState } from 'react';
 import { PrivateRoutes } from './PrivatesRoutes';
 
+import { SystemBars } from 'react-native-edge-to-edge';
+
 const NavigationRoutes = () => {
 
     const [user, setUser] = useState(undefined);
@@ -23,6 +25,7 @@ const NavigationRoutes = () => {
 
     return (
         <NavigationContainer>
+            <SystemBars style={'light'} />
             <Routes />
         </NavigationContainer>
     );
