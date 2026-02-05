@@ -1,37 +1,29 @@
-import { createStackNavigator } from '@react-navigation/stack';
-
-import { Login } from '@/screens/Login';
 import { NavigationContainer } from '@react-navigation/native';
-import { Register } from '@/screens/Register';
 
-/**
- * Rotas e parâmetros
- */
-export type PublicStackParamsList = {
-    Login: undefined;
-    Register: undefined;
-}
+import { PublicRoutes } from './PublicRoutes';
+import { useCallback, useState } from 'react';
+import { PrivateRoutes } from './PrivatesRoutes';
 
 const NavigationRoutes = () => {
-    const PublicStack = createStackNavigator<PublicStackParamsList>();
+
+    const [user, setUser] = useState(undefined);
+
+    /**
+     * Irá verificar se o usuário existe, ou seja, se está logado
+     * se tiver irá renderizar as rotas privadas, senão irá renderizar as
+     * rotas públicas.
+     */
+    const Routes = useCallback(() => {
+        if (!user) {
+            return <PublicRoutes />;
+        } else {
+            return <PrivateRoutes />
+        }
+    }, [user]);
 
     return (
         <NavigationContainer>
-            <PublicStack.Navigator
-                screenOptions={{
-                    headerShown: false,
-                }}
-                initialRouteName='Login'
-            >
-                <PublicStack.Screen 
-                    name='Login'
-                    component={Login}
-                />
-                 <PublicStack.Screen 
-                    name='Register'
-                    component={Register}
-                />
-            </PublicStack.Navigator>
+            <Routes />
         </NavigationContainer>
     );
 }
