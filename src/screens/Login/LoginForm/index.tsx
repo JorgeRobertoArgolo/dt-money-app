@@ -2,7 +2,7 @@ import { AppButton } from "@/components/AppButton";
 import { AppInput } from "@/components/AppInput";
 import { AuthHeader } from "@/components/AuthHeader";
 import { useForm } from "react-hook-form";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 
 export interface FormLoginParams {
     email: string;
@@ -37,9 +37,18 @@ export const LoginForm = () => {
                 secureTextEntry
             />
 
-            <AppButton>
-                Login
-            </AppButton>
+            <View className="flex-1 justify-between mt-8 mb-6 min-h-[250px]">
+                <AppButton mode="fill" iconName="arrow-forward">
+                    Login
+                </AppButton>
+        
+                <View>
+                    <Text className="mb-6 text-gray-300 text-base">Ainda não possui uma conta ?</Text>
+                    <AppButton mode="outline" iconName="arrow-forward">
+                        Cadastrar
+                    </AppButton>
+                </View>
+            </View>
         </>
     )
 }
