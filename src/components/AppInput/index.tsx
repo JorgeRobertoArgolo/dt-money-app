@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "@/shared/colors";
+import { ErrorMessage } from "../ErrorMessage";
 
 
 interface AppInputParams<T extends FieldValues> extends TextInputProps {
@@ -90,6 +91,11 @@ export const AppInput = <T extends FieldValues>({
                                 )
                             }
                         </TouchableOpacity>
+                        {
+                            error && (
+                                <ErrorMessage>{error.message}</ErrorMessage>
+                            )
+                        }
                     </View>
                 );
             }}
