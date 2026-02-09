@@ -10,7 +10,7 @@ import { PublicStackParamsList } from "@/routes/PublicRoutes";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { schema } from "./schema";
 
-interface FormRegisterParams {
+export interface FormRegisterParams {
     name: string;
     email: string;
     password: string;
