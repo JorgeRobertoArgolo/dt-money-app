@@ -1,6 +1,8 @@
 import { AppButton } from "@/components/AppButton";
 import { AppInput } from "@/components/AppInput";
 import { AuthHeader } from "@/components/AuthHeader";
+import { PublicStackParamsList } from "@/routes/PublicRoutes";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { useForm } from "react-hook-form";
 import { Text, View } from "react-native";
 
@@ -17,6 +19,8 @@ export const LoginForm = () => {
         formState: { isSubmitting}
     } = useForm<FormLoginParams>()
     
+    const navigation = useNavigation<NavigationProp<PublicStackParamsList>>();
+
     return (
         <>
             <AuthHeader />
@@ -44,7 +48,7 @@ export const LoginForm = () => {
         
                 <View>
                     <Text className="mb-6 text-gray-300 text-base">Ainda não possui uma conta ?</Text>
-                    <AppButton mode="outline" iconName="arrow-forward">
+                    <AppButton mode="outline" iconName="arrow-forward" onPress={() => navigation.navigate("Register")}>
                         Cadastrar
                     </AppButton>
                 </View>
