@@ -1,4 +1,5 @@
 import { AppInput } from "@/components/AppInput";
+import { AuthHeader } from "@/components/AuthHeader";
 import { useForm } from "react-hook-form";
 import { Text } from "react-native";
 
@@ -17,6 +18,8 @@ export const LoginForm = () => {
     
     return (
         <>
+            <AuthHeader />
+
             <AppInput
                 control={control}
                 name="email"
