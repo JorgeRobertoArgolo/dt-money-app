@@ -5,12 +5,16 @@ import { createContext, FC, PropsWithChildren, useContext, useState } from "reac
 import * as authService from '@/shared/services/dt-money/auth.service';
 import { IUser } from "@/shared/interfaces/https/user-interface";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { IAuthenticateResponse } from "@/shared/interfaces/https/authenticate-response";
+
 type AuthContextType = {
     user: IUser | null;
     token: string | null;
     handleAuthenticate: (params: FormLoginParams) => Promise<void>;
     handleRegister: (params: FormRegisterParams) => Promise<void>;
     handleLogout: () => void;
+    restoreUserSession: () => Promise<string | null>;
 }
 
 export const AuthContext = createContext<AuthContextType>(
@@ -24,18 +28,34 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
     const handleAuthenticate = async (userData: FormLoginParams) => {
         const { user, token } = await authService.authenticate(userData);
+        await AsyncStorage.setItem('dt-money-user', JSON.stringify({ user, token }));
         setUser(user);
         setToken(token);
     }
 
     const handleRegister = async (formData: FormRegisterParams) => {
         const { user, token } = await authService.registerUser(formData);
+        AsyncStorage.setItem('dt-money-user', JSON.stringify({ user, token }));
         setUser(user);
         setToken(token);
     }
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        await AsyncStorage.clear();
+        setUser(null);
+        setToken(null);
+    }
 
+    const restoreUserSession = async () => {
+        const userData = await AsyncStorage.getItem('dt-money-user');
+
+        if (userData) {
+            const { user, token } = JSON.parse(userData) as IAuthenticateResponse;
+            setUser(user);
+            setToken(token);
+        }
+
+        return userData;
     }
 
     return (
@@ -46,6 +66,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
                 handleAuthenticate,
                 handleRegister,
                 handleLogout,
+                restoreUserSession,
             }}
         >
             {children}

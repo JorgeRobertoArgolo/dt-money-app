@@ -6,8 +6,11 @@ import { PrivateRoutes } from './PrivatesRoutes';
 
 import { SystemBars } from 'react-native-edge-to-edge';
 import { useAuthContext } from '@/context/auth.context';
+import { Loading } from '@/screens/Loading';
 
 const NavigationRoutes = () => {
+
+    const [loading, setLoading] = useState(true);
 
     const { token, user } = useAuthContext();
 
@@ -17,12 +20,16 @@ const NavigationRoutes = () => {
      * rotas públicas.
      */
     const Routes = useCallback(() => {
+        if (loading) {
+            return <Loading setLoading={setLoading}/>;
+        }
+
         if (!user || !token) {
             return <PublicRoutes />;
         } else {
             return <PrivateRoutes />
         }
-    }, [user, token]);
+    }, [user, token, loading]);
 
     return (
         <NavigationContainer>
