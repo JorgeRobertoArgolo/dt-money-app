@@ -12,6 +12,7 @@ import { schema } from "./schema";
 import { useAuthContext } from "@/context/auth.context";
 import { AxiosError } from "axios";
 import { AppError } from "@/shared/helpers/AppError";
+import { useSnackbarContext } from "@/context/snackbar.context";
 
 export interface FormLoginParams {
     email: string;
@@ -33,6 +34,7 @@ export const LoginForm = () => {
     });
 
     const { handleAuthenticate } = useAuthContext();
+    const { notify } = useSnackbarContext();
     
     const navigation = useNavigation<NavigationProp<PublicStackParamsList>>();
 
@@ -40,9 +42,11 @@ export const LoginForm = () => {
         try {
             await handleAuthenticate(userData);
         } catch (error) {
-            console.log("ERRO AO AUTENTICAR:", error instanceof AppError);
-            if (error instanceof AxiosError) {
-                console.log("ERRO DA API:", error.response?.data);
+            if (error instanceof AppError) {
+                notify({
+                    message: error.message || "Falha ao realizar login.",
+                    messageType: "ERROR"
+                });
             }
         }
     }
