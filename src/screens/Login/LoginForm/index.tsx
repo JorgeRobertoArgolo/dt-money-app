@@ -11,6 +11,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { schema } from "./schema";
 import { useAuthContext } from "@/context/auth.context";
 import { AxiosError } from "axios";
+import { AppError } from "@/shared/helpers/AppError";
 
 export interface FormLoginParams {
     email: string;
@@ -39,13 +40,9 @@ export const LoginForm = () => {
         try {
             await handleAuthenticate(userData);
         } catch (error) {
+            console.log("ERRO AO AUTENTICAR:", error instanceof AppError);
             if (error instanceof AxiosError) {
-                // Se o erro veio do servidor (ex: senha errada)
                 console.log("ERRO DA API:", error.response?.data);
-                // Se o erro foi de conexão (ex: servidor offline ou IP errado)
-                console.log("MENSAGEM DE ERRO:", error.message);
-            } else {
-                console.log("ERRO DESCONHECIDO:", error);
             }
         }
     }
