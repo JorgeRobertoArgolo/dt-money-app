@@ -9,6 +9,8 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import { schema } from "./schema";
+import { useAuthContext } from "@/context/auth.context";
+import { AxiosError } from "axios";
 
 export interface FormLoginParams {
     email: string;
@@ -27,12 +29,25 @@ export const LoginForm = () => {
             password: ''
         },
         resolver: yupResolver(schema),
-    })
+    });
+
+    const { handleAuthenticate } = useAuthContext();
     
     const navigation = useNavigation<NavigationProp<PublicStackParamsList>>();
 
-    const onSubmit = async () => {
-        
+    const onSubmit = async (userData: FormLoginParams) => {
+        try {
+            await handleAuthenticate(userData);
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                // Se o erro veio do servidor (ex: senha errada)
+                console.log("ERRO DA API:", error.response?.data);
+                // Se o erro foi de conexão (ex: servidor offline ou IP errado)
+                console.log("MENSAGEM DE ERRO:", error.message);
+            } else {
+                console.log("ERRO DESCONHECIDO:", error);
+            }
+        }
     }
 
     return (

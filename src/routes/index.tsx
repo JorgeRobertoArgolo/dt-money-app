@@ -5,10 +5,11 @@ import { useCallback, useState } from 'react';
 import { PrivateRoutes } from './PrivatesRoutes';
 
 import { SystemBars } from 'react-native-edge-to-edge';
+import { useAuthContext } from '@/context/auth.context';
 
 const NavigationRoutes = () => {
 
-    const [user, setUser] = useState(undefined);
+    const { token, user } = useAuthContext();
 
     /**
      * Irá verificar se o usuário existe, ou seja, se está logado
@@ -16,12 +17,12 @@ const NavigationRoutes = () => {
      * rotas públicas.
      */
     const Routes = useCallback(() => {
-        if (!user) {
+        if (!user || !token) {
             return <PublicRoutes />;
         } else {
             return <PrivateRoutes />
         }
-    }, [user]);
+    }, [user, token]);
 
     return (
         <NavigationContainer>
