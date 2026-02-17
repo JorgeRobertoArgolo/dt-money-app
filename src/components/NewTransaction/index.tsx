@@ -8,6 +8,7 @@ import { CreateTransactionInterface } from "@/shared/interfaces/https/create-tra
 import { colors } from "@/shared/colors";
 import { useBottomSheetContext } from "@/context/bottomsheet.context";
 import { TransactionTypeSelector } from "../SelectType";
+import { SelectCategoryModel } from "../SelectCategoryModel";
 
 export const NewTransaction = () => {
 
@@ -44,6 +45,8 @@ export const NewTransaction = () => {
                     value={transaction.description}
                     onChangeText={(text) => setTransactionData("description", text)}
                 />
+
+
                 <CurrencyInput
                     className="text-white text-lg h-[50px] bg-background-primary my-2 rounded-[6] pl-4"
                     value={transaction.value}
@@ -54,6 +57,12 @@ export const NewTransaction = () => {
                     minValue={0}
                     onChangeValue={(value) => setTransactionData("value", value ?? 0)}
                 />
+
+                <SelectCategoryModel 
+                    selectedCategory={transaction.categoryId}
+                    onSelected={(categoryId) => setTransactionData("categoryId", categoryId)}
+                />
+                
                 <TransactionTypeSelector 
                     typeId={transaction.typeId}
                     setTransactionType={(typeId) => {setTransactionData("typeId", typeId)}}

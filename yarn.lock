@@ -2540,6 +2540,11 @@ expo-asset@~12.0.12:
     "@expo/image-utils" "^0.8.8"
     expo-constants "~18.0.12"
 
+expo-checkbox@~5.0.8:
+  version "5.0.8"
+  resolved "https://registry.yarnpkg.com/expo-checkbox/-/expo-checkbox-5.0.8.tgz#b0b6c783fdfb4ff911cd0f23cc307c5cca33987a"
+  integrity sha512-QDMxNXZu5WBTwRM9oPd2EnTiF9iLvwff3t0q6mQr955BR2N9mn1py7xnuYiRHKBzmYySqZH7/S4QQqWOWX4LTw==
+
 expo-constants@~18.0.12, expo-constants@~18.0.13:
   version "18.0.13"
   resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-18.0.13.tgz#0117f1f3d43be7b645192c0f4f431fb4efc4803d"
