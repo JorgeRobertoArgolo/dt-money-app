@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TouchableOpacity, View, Text, TextInput } from "react-native";
+import { TouchableOpacity, View, Text, TextInput, ActivityIndicator } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons"
 import * as yup from 'yup';
 
@@ -12,46 +12,55 @@ import { TransactionTypeSelector } from "../SelectType";
 import { SelectCategoryModel } from "../SelectCategoryModel";
 import { transactionSchema } from "./schema";
 import { AppButton } from "../AppButton";
+import { ErrorMessage } from "../ErrorMessage";
+import { useTransactionContext } from "@/context/transaction.context";
+import { useErrorHandler } from "@/shared/hooks/useErrorHandler";
 
-type ValidationErrorsType = Record<keyof CreateTransactionInterface, string>;
+type ValidationErrorsTypes = Record<keyof CreateTransactionInterface, string>;
 
 export const NewTransaction = () => {
 
     const { closeBottomSheet } = useBottomSheetContext();
+    const { createTransaction } = useTransactionContext();
+    const { handleError } = useErrorHandler();
 
-    const [validationErrors, setValidationErrors] = useState<ValidationErrorsType>();
-
+    const [loading, setLoading] = useState(false);
+    
     const [transaction, setTransaction] = useState<CreateTransactionInterface>({
         categoryId: 0,
         description:"",
         typeId: 0,
         value: 0,
     });
+    
+    const [validationErrors, setValidationErrors] = useState<ValidationErrorsTypes>();
 
     const handleCreateTransaction = async () => {
-        try {
-            await transactionSchema.validate({transaction}, {abortEarly: false});
-        } catch (error) {
-            if (error instanceof yup.ValidationError) {
-                const errors = {} as ValidationErrorsType;
-                error.inner.forEach((err) => {
-                    if (err.path) {
-                        errors[err.path as keyof CreateTransactionInterface] = err.message;
-                    }
-                });
-
-                setValidationErrors(errors);
-            }
-        }
-    };
-
-    console.log(validationErrors);
+    try {
+        setLoading(true)
+        await transactionSchema.validate(transaction, { abortEarly: false, })
+        await createTransaction(transaction)
+        closeBottomSheet()
+    } catch (error) {
+        if (error instanceof yup.ValidationError) {
+            const errors = {} as ValidationErrorsTypes
+            error.inner.forEach((err) => {
+                if (err.path) {
+                    errors[err.path as keyof CreateTransactionInterface] = err.message
+                }
+            })
+        setValidationErrors(errors)
+      } else {
+            handleError(error, 'Falha ao criar transação')
+      }
+    } finally {
+        setLoading(false)
+    }
+  }
 
     const setTransactionData = (key: keyof CreateTransactionInterface, value: string | number) => {
         setTransaction((prevData) => ({...prevData, [key]: value}));
     }
-
-    console.log(transaction)
 
     return (
         <View className="px-8 py-5">
@@ -71,7 +80,11 @@ export const NewTransaction = () => {
                     value={transaction.description}
                     onChangeText={(text) => setTransactionData("description", text)}
                 />
-
+                {
+                    validationErrors?.description && (
+                        <ErrorMessage>{validationErrors.description}</ErrorMessage>
+                    )
+                }
 
                 <CurrencyInput
                     className="text-white text-lg h-[50px] bg-background-primary my-2 rounded-[6] pl-4"
@@ -83,20 +96,37 @@ export const NewTransaction = () => {
                     minValue={0}
                     onChangeValue={(value) => setTransactionData("value", value ?? 0)}
                 />
+                {
+                    validationErrors?.value && (
+                        <ErrorMessage>{validationErrors.value}</ErrorMessage>
+                    )
+                }
 
                 <SelectCategoryModel 
                     selectedCategory={transaction.categoryId}
                     onSelected={(categoryId) => setTransactionData("categoryId", categoryId)}
                 />
+                {
+                    validationErrors?.categoryId && (
+                        <ErrorMessage>{validationErrors.categoryId}</ErrorMessage>
+                    )
+                }
                 
                 <TransactionTypeSelector 
                     typeId={transaction.typeId}
                     setTransactionType={(typeId) => {setTransactionData("typeId", typeId)}}
                 />
+                {
+                    validationErrors?.typeId && (
+                        <ErrorMessage>{validationErrors.typeId}</ErrorMessage>
+                    )
+                }
 
                 <View className="mt-4">
                     <AppButton onPress={handleCreateTransaction}>
-                        Registrar
+                        {
+                            loading ? <ActivityIndicator color={colors.white} /> : "Registrar"
+                        }
                     </AppButton>
                 </View>
             </View>
