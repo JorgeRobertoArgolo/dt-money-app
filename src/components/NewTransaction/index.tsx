@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TouchableOpacity, View, Text, TextInput } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons"
+import * as yup from 'yup';
 
 import CurrencyInput from 'react-native-currency-input'
 
@@ -9,10 +10,16 @@ import { colors } from "@/shared/colors";
 import { useBottomSheetContext } from "@/context/bottomsheet.context";
 import { TransactionTypeSelector } from "../SelectType";
 import { SelectCategoryModel } from "../SelectCategoryModel";
+import { transactionSchema } from "./schema";
+import { AppButton } from "../AppButton";
+
+type ValidationErrorsType = Record<keyof CreateTransactionInterface, string>;
 
 export const NewTransaction = () => {
 
     const { closeBottomSheet } = useBottomSheetContext();
+
+    const [validationErrors, setValidationErrors] = useState<ValidationErrorsType>();
 
     const [transaction, setTransaction] = useState<CreateTransactionInterface>({
         categoryId: 0,
@@ -20,6 +27,25 @@ export const NewTransaction = () => {
         typeId: 0,
         value: 0,
     });
+
+    const handleCreateTransaction = async () => {
+        try {
+            await transactionSchema.validate({transaction}, {abortEarly: false});
+        } catch (error) {
+            if (error instanceof yup.ValidationError) {
+                const errors = {} as ValidationErrorsType;
+                error.inner.forEach((err) => {
+                    if (err.path) {
+                        errors[err.path as keyof CreateTransactionInterface] = err.message;
+                    }
+                });
+
+                setValidationErrors(errors);
+            }
+        }
+    };
+
+    console.log(validationErrors);
 
     const setTransactionData = (key: keyof CreateTransactionInterface, value: string | number) => {
         setTransaction((prevData) => ({...prevData, [key]: value}));
@@ -67,6 +93,12 @@ export const NewTransaction = () => {
                     typeId={transaction.typeId}
                     setTransactionType={(typeId) => {setTransactionData("typeId", typeId)}}
                 />
+
+                <View className="mt-4">
+                    <AppButton onPress={handleCreateTransaction}>
+                        Registrar
+                    </AppButton>
+                </View>
             </View>
         </View>
     );
