@@ -5,7 +5,6 @@ import { FC, useState } from 'react'
 import { DeleteModal } from './DeleteModal'
 import * as transactionService from '@/shared/services/dt-money/transaction.service'
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler'
-import { tr } from 'date-fns/locale'
 import { useSnackbarContext } from '@/context/snackbar.context'
 
 interface Params {
@@ -50,7 +49,7 @@ export const RightAction: FC<Params> = ({ transactionId }) => {
             >
                 <MaterialIcons name="delete-outline" color={colors.white} size={30} />
             </TouchableOpacity>
-            <DeleteModal visible={modalVisible} hideModal={hideModal} handleDeleteTransaction={handleDeleteTransaction}/>
+            <DeleteModal visible={modalVisible} hideModal={hideModal} handleDeleteTransaction={handleDeleteTransaction} loading={loading}/>
         </>
     )
 }
