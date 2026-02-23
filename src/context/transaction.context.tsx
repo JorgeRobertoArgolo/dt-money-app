@@ -15,6 +15,8 @@ export type TransactionContextType = {
     fetchTransactions: () => Promise<void>;
     totalTransactions: TotalTransactions;
     transactions: Transaction[];
+    refreshTransactions: () => Promise<void>;
+    loading: boolean;
 }
 
 export const TransactionContext = createContext({} as TransactionContextType);
@@ -25,11 +27,25 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
     
     const [categories, setCategories] = useState<TransactionCategory[]>([]);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [loading, setLoading] = useState(false);
     const [totalTransactions, setTotalTransactions] = useState<TotalTransactions>({
         expense: 0,
         revenue: 0,
         total: 0,
     });
+
+    const refreshTransactions = async () => {
+        setLoading(true);
+        const transactionsResponse = await transactionService.getTransactions({
+            page: 1,
+            perPage: 10,
+
+        });
+        console.log(transactionsResponse)
+        setTransactions(transactionsResponse.data);
+        setTotalTransactions(transactionsResponse.totalTransactions);
+        setLoading(false);
+    }
     
     const fetchCategories  = async () => {
         const categoriesResponse = await transactionService.getTransactionCategories();
@@ -38,10 +54,12 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
 
     const createTransaction = async (transaction: CreateTransactionInterface) => {
         await transactionService.createTransaction(transaction);
+        await refreshTransactions();
     }
 
     const updateTransaction = async (transaction: UpdateTransactionInterface) => {
         await transactionService.updateTransaction(transaction);
+        await refreshTransactions();
     }
 
     const fetchTransactions = useCallback(
@@ -67,6 +85,8 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
                 fetchTransactions,
                 totalTransactions,
                 transactions,
+                refreshTransactions,
+                loading
             }}
         >
             {children}
