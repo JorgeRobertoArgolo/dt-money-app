@@ -6,6 +6,7 @@ import { FlatList, RefreshControl } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ListHeader } from "./ListHeader";
 import { TransactionCard } from "./TransactionCard";
+import { EmptyList } from "./EmptyList";
 
 export const Home = () => {
 
@@ -107,6 +108,7 @@ export const Home = () => {
                 keyExtractor={({id}) => `transaction-${id}`}
                 renderItem={({item}) => <TransactionCard transaction={item} />}
                 className="bg-background-secondary"
+                ListEmptyComponent={loadings.initial ? null : <EmptyList />}
                 onEndReached={handleLoadMoreTransactions}
                 onEndReachedThreshold={0.5} //Faz com que ao chegar na metade, já carrege os próximos
                 refreshControl={
