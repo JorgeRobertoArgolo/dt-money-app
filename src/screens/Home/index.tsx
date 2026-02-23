@@ -10,7 +10,14 @@ import { TransactionCard } from "./TransactionCard";
 export const Home = () => {
 
     const { handleLogout } = useAuthContext();
-    const { fetchCategories, fetchTransactions, transactions, refreshTransactions, loading } = useTransactionContext();
+    const { 
+        fetchCategories, 
+        fetchTransactions, 
+        transactions, 
+        refreshTransactions, 
+        loading, 
+        loadMoreTransactions
+    } = useTransactionContext();
     const { handleError } = useErrorHandler();
 
     const handleFetchCategories = async () => {
@@ -26,7 +33,7 @@ export const Home = () => {
             /**
              * Executa as requisições ao mesmo tempo
              */
-            await Promise.all([handleFetchCategories(),fetchTransactions()])
+            await Promise.all([handleFetchCategories(),fetchTransactions({ page: 1 })])
         })();
     }, []);
 
@@ -39,6 +46,8 @@ export const Home = () => {
                 keyExtractor={({id}) => `transaction-${id}`}
                 renderItem={({item}) => <TransactionCard transaction={item} />}
                 className="bg-background-secondary"
+                onEndReached={loadMoreTransactions}
+                onEndReachedThreshold={0.5}
                 refreshControl={
                     <RefreshControl onRefresh={refreshTransactions} refreshing={loading}/>
                 }

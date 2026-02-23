@@ -6,17 +6,23 @@ import { CreateTransactionInterface } from "@/shared/interfaces/https/create-tra
 import { Transaction } from "@/shared/interfaces/https/transaction";
 import { TotalTransactions } from "@/shared/interfaces/https/totalTransactions";
 import { UpdateTransactionInterface } from "@/shared/interfaces/https/update-transaction-request";
+import { Pagination } from "@/shared/interfaces/https/getTransactionRequest";
+
+interface FetchTransactionParams {
+    page: number
+}
 
 export type TransactionContextType = {
     fetchCategories : () => Promise<void>;
     categories: TransactionCategory[];
     createTransaction: (transaction: CreateTransactionInterface) => Promise<void>;
     updateTransaction: (transaction: UpdateTransactionInterface) => Promise<void>;
-    fetchTransactions: () => Promise<void>;
+    fetchTransactions: (params: FetchTransactionParams) => Promise<void>;
     totalTransactions: TotalTransactions;
     transactions: Transaction[];
     refreshTransactions: () => Promise<void>;
     loading: boolean;
+    loadMoreTransactions: () => Promise<void>;
 }
 
 export const TransactionContext = createContext({} as TransactionContextType);
@@ -34,16 +40,33 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
         total: 0,
     });
 
+    const [pagination, setPagination] = useState<Pagination>({
+        page: 1,
+        perPage: 5,
+        totalRows: 0,
+        totalPages: 0,
+    });
+
     const refreshTransactions = async () => {
+
+        const { page, perPage } = pagination;
+
+
         setLoading(true);
         const transactionsResponse = await transactionService.getTransactions({
             page: 1,
-            perPage: 10,
+            perPage: page * perPage,
 
         });
         console.log(transactionsResponse)
         setTransactions(transactionsResponse.data);
         setTotalTransactions(transactionsResponse.totalTransactions);
+        setPagination({
+            ...pagination,
+            page,
+            totalPages: transactionsResponse.totalPages,
+            totalRows: transactionsResponse.totalRows,
+        });
         setLoading(false);
     }
     
@@ -63,17 +86,39 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
     }
 
     const fetchTransactions = useCallback(
-        async () => {
-            const transactionsResponse = await transactionService.getTransactions({
-                page: 1,
-                perPage: 10,
+        async ({ page = 1 }: FetchTransactionParams) => {
+            setLoading(true);
 
+            const transactionsResponse = await transactionService.getTransactions({
+                page: page,
+                perPage: pagination.perPage,
             });
-            console.log(transactionsResponse)
-            setTransactions(transactionsResponse.data);
+
+            if (page === 1) {
+                setTransactions(transactionsResponse.data);
+            } else {
+                setTransactions((prevState) => [...prevState, ...transactionsResponse.data])
+            }
+
             setTotalTransactions(transactionsResponse.totalTransactions);
-        }, []
+            setPagination({
+                ...pagination,
+                page,
+                totalRows: transactionsResponse.totalRows,
+                totalPages: transactionsResponse.totalPages,
+            });
+            setLoading(false);
+        }, [pagination]
     )
+
+    const loadMoreTransactions = useCallback(
+        async () => {
+            if (loading || pagination.page >= pagination.totalPages) {
+                return;
+            }
+            fetchTransactions({ page: pagination.page + 1 })
+        }, [loading, pagination]
+    );
 
     return (
         <TransactionContext.Provider
@@ -86,7 +131,8 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
                 totalTransactions,
                 transactions,
                 refreshTransactions,
-                loading
+                loading,
+                loadMoreTransactions
             }}
         >
             {children}
