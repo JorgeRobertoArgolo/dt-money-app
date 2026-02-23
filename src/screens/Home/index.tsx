@@ -28,12 +28,36 @@ export const Home = () => {
         }
     }
 
+    const handleFetchInitialTransactions = async () => {
+        try {
+            await fetchTransactions({ page: 1 });
+        } catch (error) {
+            handleError(error, "Falha ao buscar transações")
+        }
+    }
+
+    const handleLoadMoreTransactions = async () => {
+        try {
+            await loadMoreTransactions();
+        } catch (error) {
+            handleError(error, "Falha ao carregar novas transações")
+        }
+    }
+
+    const handleRefreshTransactions = async () => {
+        try {
+            await refreshTransactions();
+        } catch (error) {
+            handleError(error, "Falha ao recarregar transações")
+        }
+    }
+
     useEffect(() => {
         (async () => {
             /**
              * Executa as requisições ao mesmo tempo
              */
-            await Promise.all([handleFetchCategories(),fetchTransactions({ page: 1 })])
+            await Promise.all([handleFetchCategories(), handleFetchInitialTransactions()])
         })();
     }, []);
 
@@ -46,10 +70,10 @@ export const Home = () => {
                 keyExtractor={({id}) => `transaction-${id}`}
                 renderItem={({item}) => <TransactionCard transaction={item} />}
                 className="bg-background-secondary"
-                onEndReached={loadMoreTransactions}
-                onEndReachedThreshold={0.5}
+                onEndReached={handleLoadMoreTransactions}
+                onEndReachedThreshold={0.5} //Faz com que ao chegar na metade, já carrege os próximos
                 refreshControl={
-                    <RefreshControl onRefresh={refreshTransactions} refreshing={loading}/>
+                    <RefreshControl onRefresh={handleRefreshTransactions} refreshing={loading}/>
                 }
             />
         </SafeAreaView>
