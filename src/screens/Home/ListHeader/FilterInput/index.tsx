@@ -4,10 +4,13 @@ import { MaterialIcons } from '@expo/vector-icons'
 import { useTransactionContext } from "@/context/transaction.context";
 import { colors } from "@/shared/colors";
 import { useEffect, useState } from "react";
+import { useBottomSheetContext } from "@/context/bottomsheet.context";
+import { TransactionsFilters } from "./TransactionsFilters";
 
 export const FilterInput = () => {
     
     const { pagination, setSearchText, searchText, fetchTransactions } = useTransactionContext();
+    const { openBottomSheet } = useBottomSheetContext();
 
     const [text, setText] = useState("");
 
@@ -50,7 +53,10 @@ export const FilterInput = () => {
                     value={text}
                     onChangeText={setText}
                 />
-                <TouchableOpacity className="absolute right-0">
+                <TouchableOpacity 
+                    onPress={() => openBottomSheet(<TransactionsFilters />, 1)}
+                    className="absolute right-0"
+                >
                     <MaterialIcons 
                         name="filter-list" 
                         color={colors["accent-brand-light"]}

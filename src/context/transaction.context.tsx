@@ -6,7 +6,7 @@ import { CreateTransactionInterface } from "@/shared/interfaces/https/create-tra
 import { Transaction } from "@/shared/interfaces/https/transaction";
 import { TotalTransactions } from "@/shared/interfaces/https/totalTransactions";
 import { UpdateTransactionInterface } from "@/shared/interfaces/https/update-transaction-request";
-import { Pagination } from "@/shared/interfaces/https/getTransactionRequest";
+import { Filters, Pagination } from "@/shared/interfaces/https/getTransactionRequest";
 
 interface FetchTransactionParams {
     page: number
@@ -21,6 +21,11 @@ interface Loadings {
 interface HandleLoadingParams {
     key: keyof Loadings;
     value: boolean;
+}
+
+interface HandleFiltersParams {
+    key: keyof Filters;
+    value: Date | boolean | number;
 }
 
 export type TransactionContextType = {
@@ -38,6 +43,8 @@ export type TransactionContextType = {
     pagination: Pagination;
     setSearchText: (text: string) => void;
     searchText: string;
+    filters: Filters
+    handleFilters: (params: HandleFiltersParams) => void;
 }
 
 export const TransactionContext = createContext({} as TransactionContextType);
@@ -67,6 +74,13 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
     });
 
     const [searchText, setSearchText] = useState("");
+
+    const [filters, setFilters] = useState<Filters>({
+        categoryIds: {},
+        typeId: undefined,
+        from: undefined,
+        to: undefined,
+    });
 
     const handleLoadings = ({key, value}: HandleLoadingParams) => {
         setLoadings(
@@ -144,6 +158,13 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
             fetchTransactions({ page: pagination.page + 1 })
         }, [loadings.loadMore, pagination]
     );
+ 
+    const handleFilters = ({ key, value }: HandleFiltersParams) => {
+        setFilters((prev) => ({
+            ...prev,
+            [key]: value
+        }));
+    }
 
     return (
         <TransactionContext.Provider
@@ -161,7 +182,9 @@ export const TransactionContextProvider: FC<PropsWithChildren> = ({
                 loadings,
                 pagination,
                 setSearchText,
-                searchText
+                searchText,
+                filters,
+                handleFilters
             }}
         >
             {children}
