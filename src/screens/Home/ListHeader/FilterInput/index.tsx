@@ -3,10 +3,35 @@ import { MaterialIcons } from '@expo/vector-icons'
 
 import { useTransactionContext } from "@/context/transaction.context";
 import { colors } from "@/shared/colors";
+import { useEffect, useState } from "react";
 
 export const FilterInput = () => {
     
-    const { pagination } = useTransactionContext();
+    const { pagination, setSearchText, searchText, fetchTransactions } = useTransactionContext();
+
+    const [text, setText] = useState("");
+
+    /**
+     *  Com o setTimeout, a alteração no setSearchText
+     *  Só é feita, após meio segundo sem digitar nada
+     */
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setSearchText(text);
+        }, 500);
+
+        return () => clearTimeout(handler);
+    }, [text]);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                await fetchTransactions({ page: 1});
+            } catch (error) {
+                
+            }
+        })()
+    }, [searchText]);
     
     return (
         <View className="mb-4 w-[90%] self-center">
@@ -22,6 +47,8 @@ export const FilterInput = () => {
                     className="h-[50px] text-white w-full bg-background-primary text-lg pl-4"
                     placeholderTextColor={colors.gray[600]}
                     placeholder="Busque uma transação"
+                    value={text}
+                    onChangeText={setText}
                 />
                 <TouchableOpacity className="absolute right-0">
                     <MaterialIcons 
